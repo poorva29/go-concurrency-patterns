@@ -1,0 +1,205 @@
+Go Concurrency Patterns
+10 May 2016
+Tags: go golang
+
+Poorva Mahajan
+poorva@oogway.com
+Github Handle - poorva29
+
+* What is concurrency ?
+
+- Composition of independently executing processes
+- About dealing with lots of things at once
+- Does not mean parallelism
+
+
+* A Iterator Function
+
+.play iterator.go /START OMIT/,/STOP OMIT/
+
+
+* A Random Interval Iterator Function
+
+Makes interval between messages unpredictable (Under a second).
+
+.play iterator_random.go /START OMIT/,/STOP OMIT/
+
+
+* Wrapping aroud main
+
+Running it !!
+
+.play iterator_random_main.go /START1 OMIT/,/STOP1 OMIT/,/START2 OMIT/,/STOP2 OMIT/
+
+
+* Turning To Goroutines
+
+Go statement runs the function as usual , but dosen't make the caller wait.
+
+It launches a goroutine.
+
+Functionality is analogous to the & in shell command.
+
+.play iterator_goroutine.go /START1 OMIT/,/STOP1 OMIT/,/START2 OMIT/,/STOP2 OMIT/
+
+
+* Waiting a little
+
+When main returns iterator program ends.
+
+This is to show that the goroutines are running.
+
+.play wait_go_iterator.go /START OMIT/,/STOP OMIT/
+
+
+* Goroutines
+
+What is Goroutine ? a independent function launched by go statement.
+
+It has it's own call stack which grows and shrinks.
+
+It's not a thread.
+
+There might be only one thread in a program with thousands of goroutines.
+
+
+* Using Channels
+
+A channel in Go provides a connection between two goroutines, allowing them to communicate.
+
+Here it connects the main and iterator goroutines.
+
+.play chan_go_iterator.go /START1 OMIT/,/STOP1 OMIT/,/START2 OMIT/,/STOP2 OMIT/
+
+
+* Synchronization
+
+When main executes <- c, it will wait for the value to be sent.
+
+Similarly when iterator function executes c <- it wait for receiver to be ready.
+
+Sender and receiver both must be ready , otherwise they wait until they are.
+
+Thus channels communicate and synchronize.
+
+
+* .
+.image pattern_image
+
+* Generator : Function that returns a channel
+
+Channels are first class values , just like strings or integers
+
+.play generator_iterator.go /START1 OMIT/,/STOP1 OMIT/
+
+.code generator_iterator.go /START2 OMIT/,/STOP2 OMIT/
+
+
+* Channels as a handle on a service
+
+Iterator returns a channel which communicates with the service it provides
+
+We can have such n instances of this service
+
+.play generator_iterator_2.go /START1 OMIT/,/STOP1 OMIT/
+
+
+* Multiplexer
+
+Earlier Two could talk only after One
+
+Here we let talk whomsoever is ready
+
+.code multiplexer_iterator.go /START3 OMIT/,/STOP3 OMIT/
+
+.play multiplexer_iterator.go /START1 OMIT/,/STOP1 OMIT/
+
+
+* Sequencing Again !
+
+Send channel on another channel, making goroutine wait it's turn
+
+.code sequence_iterator.go /START0 OMIT/,/STOP0 OMIT/
+
+
+* Sequencing Again !
+
+.code sequence_iterator.go /START1 OMIT/,/STOP1 OMIT/
+
+.code sequence_iterator.go /START2 OMIT/,/STOP2 OMIT/
+
+.play sequence_iterator.go /START3 OMIT/,/STOP3 OMIT/
+
+
+* Select
+
+A control structure for concurrency
+
+Similar to switch
+
+.code select.go
+
+
+* Old Revision
+
+.code multiplexer_iterator.go /START3 OMIT/,/STOP3 OMIT/
+
+
+* New Revision (Using select)
+
+.play select_iterator.go /START3 OMIT/,/STOP3 OMIT/
+
+
+* Timeout using select
+
+time.After returns a channels that blaocks for a specified time interval.
+After the interval, the channel delivers the current time.
+
+.play timeout.go /START1 OMIT/,/STOP1 OMIT/
+
+
+* Timeout for whole iteration using select
+
+Create a timer once outside the loop, to timeout entire iteration
+
+In previous revision we had timeout for each message
+
+.play timeout_all.go /START1 OMIT/,/STOP1 OMIT/
+
+
+* Quit Channel
+
+We can ask One to stop when we are done
+
+.code quit.go /START1 OMIT/,/STOP1 OMIT/
+
+.play quit.go /START2 OMIT/,/STOP2 OMIT/
+
+
+* Receive and acknoweledge quit
+
+Let the iterator notify that it has finised !
+
+.code respond_quit.go /START1 OMIT/,/STOP1 OMIT/
+
+.play respond_quit.go /START2 OMIT/,/STOP2 OMIT/
+
+
+* Chineese Wispers
+
+.play chineese_wispers.go /START OMIT/,/STOP OMIT/
+
+
+* Google
+
+.play google.go /START1 OMIT/,/STOP1 OMIT/,/START2 OMIT/,/STOP2 OMIT/
+
+
+* Google Search 1.2
+
+.play google1.2.go /START1 OMIT/,/STOP1 OMIT/
+
+
+* Google Search 1.3
+
+.play google1.3.go /START OMIT/,/STOP OMIT/
